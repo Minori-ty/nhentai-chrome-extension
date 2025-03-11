@@ -1,0 +1,6 @@
+#image-container {
+    img {
+        height: 90vh !important;
+        width: calc(90vh * (64 / 91));
+    }
+}

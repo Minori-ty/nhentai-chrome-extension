@@ -1,0 +1,48 @@
+.page-indicator {
+    position: fixed;
+    top: 70px;
+    right: 20px;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    z-index: 1000;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.page-indicator.hidden {
+    opacity: 0;
+}
+
+/* 单图模式按钮样式 */
+.single-image-btn {
+    margin-left: 10px !important;
+    background-color: #ed2553 !important;
+    border-color: #ed2553 !important;
+}
+
+.single-image-btn:hover {
+    background-color: #c01d43 !important;
+    border-color: #c01d43 !important;
+}
+
+.single-image-btn .fas {
+    margin-right: 5px;
+}
+
+button#scroll-mode.btn.btn-primary {
+    margin-left: 0 !important;
+    background-color: #4caf50 !important;
+    border-color: #4caf50 !important;
+}
+
+button#scroll-mode.btn.btn-primary:hover {
+    background-color: #388e3c !important;
+    border-color: #388e3c !important;
+}
+
+button#scroll-mode.btn.btn-primary .fa {
+    margin-right: 5px;
+}

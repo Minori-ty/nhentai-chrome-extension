@@ -1,0 +1,38 @@
+name: Build and Release Flutter APK
+
+on:
+    push:
+        tags:
+            - 'v*.*.*' # Triggers the workflow when a tag is pushed
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: 迁出代码
+              uses: actions/checkout@v4
+
+            - name: 设置 node 环境
+              uses: actions/setup-node@v4
+              with:
+                  node-version: '20'
+
+            - name: 安装依赖
+              run: npm install
+
+            - name: 打包
+              run: npm run build
+
+            - name: 发布 release
+              uses: softprops/action-gh-release@v2
+              env:
+                  GITHUB_TOKEN: ${{ secrets.MY_GITHUB_PAT }}
+              with:
+                  tag_name: ${{ github.ref_name }} # Use github.ref_name for the correct tag name
+                  name: ${{ github.ref_name }} # Use github.ref_name for the correct release name
+                  body: |
+                      发布 ${{ github.ref_name }}
+                  draft: false
+                  prerelease: false
+                  files: dist_chrome

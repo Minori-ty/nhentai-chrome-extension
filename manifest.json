@@ -1,0 +1,22 @@
+{
+    "manifest_version": 3,
+    "name": "nhentai",
+    "version": "0.0.1",
+    "description": "一个 nhentai 的 chrome 浏览器插件",
+    "icons": {
+        "128": "icon-128.png"
+    },
+    "content_scripts": [
+        {
+            "matches": ["*://*.nhentai.net/*"],
+            "js": ["src/index.ts"],
+            "css": ["contentStyle.css"]
+        }
+    ],
+    "web_accessible_resources": [
+        {
+            "resources": ["contentStyle.css", "icon-128.png", "icon-32.png"],
+            "matches": []
+        }
+    ]
+}
