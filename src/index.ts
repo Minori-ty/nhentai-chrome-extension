@@ -1,7 +1,7 @@
 import { homePage } from './pages/home'
 import { singlePage } from './pages/singlePage'
 import { favcontainerPage } from './pages/favorites'
-import forbidanClear from './utils/forbidanClear'
+import '@/utils/debug'
 import { comicDetailPage } from './pages/comicDetail'
 /**
  * 将nhentai分成4种类型 1.首页 2.漫画详情页 3.搜索页 4.收藏夹
@@ -29,8 +29,6 @@ import { comicDetailPage } from './pages/comicDetail'
  * https://nhentai.net/group/nimunoya/
  * https://nhentai.net/parody/original/popular-week?page=2
  */
-
-forbidanClear()
 
 const pathname = window.location.pathname
 const searchPage = ['/search/', '/parody/', '/tag/', '/artist/', '/group/', '/language/', '/category/', '/character/']
