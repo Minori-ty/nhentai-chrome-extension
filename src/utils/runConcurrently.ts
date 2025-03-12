@@ -123,7 +123,7 @@ export const example = async (): Promise<void> => {
         // 处理每个任务的结果
         results.forEach((result, index) => {
             if (result.success && result.data) {
-                console.log(`Task ${index + 1} succeeded:`, result.data)
+                // console.log(`Task ${index + 1} succeeded:`, result.data)
             } else if (result.error) {
                 console.error(`Task ${index + 1} failed:`, result.error.message)
             }

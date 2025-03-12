@@ -68,8 +68,6 @@ export default class InfiniteScroll {
     }
 
     handleScroll() {
-        console.log(this.page, this.total)
-
         if (this.page >= this.total) {
             this.pageEndIndicator.removeLoadingIndicator()
             this.pageEndIndicator.addEmptyIndicator()

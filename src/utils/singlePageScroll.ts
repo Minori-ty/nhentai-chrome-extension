@@ -55,7 +55,7 @@ export default class SinglePageScroll {
             imgWrapper.id = `image-wrapper-${i}`
 
             const pageNumDiv = document.createElement('div')
-            pageNumDiv.className = 'page-indicator'
+            pageNumDiv.className = 'page-id'
             pageNumDiv.textContent = `${i} / ${this.total}`
             imgWrapper.appendChild(pageNumDiv)
 
