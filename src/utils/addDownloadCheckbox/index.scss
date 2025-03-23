@@ -1,0 +1,36 @@
+.cover {
+    .download-checkbox {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        width: 30px;
+        height: 30px;
+        border: 3px solid #333;
+        border-radius: 6px;
+        outline: none;
+        cursor: pointer;
+        z-index: 999;
+    }
+}
+
+button#download-comic.btn.btn-primary {
+    margin-left: 0 !important;
+    background-color: #4caf50 !important;
+    border-color: #4caf50 !important;
+}
+
+button#download-comic.btn.btn-primary:hover {
+    background-color: #388e3c !important;
+    border-color: #388e3c !important;
+}
+
+button#download-comic.btn.btn-primary .fa {
+    margin-right: 5px;
+}
+
+#download-comic {
+    position: fixed;
+    top: 20%;
+    right: 30px;
+    z-index: 999;
+}

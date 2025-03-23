@@ -1,7 +1,9 @@
+import { addDownloadCheckbox } from './addDownloadCheckbox'
 import PageIndicator from './indicator'
 import Observer from './observer'
 import PageEndIndicator from './pageEndIndicator'
 import parseHTML from './parseHTML'
+import { createDownloadButton } from '@/utils/addDownloadCheckbox'
 
 export default class InfiniteScroll {
     /** 节流定时器 */
@@ -40,6 +42,7 @@ export default class InfiniteScroll {
         this.page = page
         this.setFirstPage()
         this.addScrollListener()
+        createDownloadButton()
     }
 
     /**
@@ -140,16 +143,18 @@ export default class InfiniteScroll {
      */
     handleLazyImages(container: Element | DocumentFragment, pageNum: number) {
         const lazyImages = container.querySelectorAll('img.lazyload')
+        const page = pageNum.toString()
         lazyImages.forEach((img) => {
             if (img instanceof HTMLImageElement) {
                 const dataSrc = img.getAttribute('data-src')
                 if (dataSrc) {
                     img.src = dataSrc
-                    img.removeAttribute('data-src')
-                    // 添加页码属性
-                    img.setAttribute('data-page', pageNum.toString())
-                    this.observer.addObserve(img)
+                    // img.removeAttribute('data-src')
                 }
+                // 添加页码属性
+                img.setAttribute('data-page', page)
+                this.observer.addObserve(img)
+                addDownloadCheckbox(img)
             }
         })
     }
@@ -187,8 +192,11 @@ export default class InfiniteScroll {
         if (firstContainer) {
             const img = firstContainer.querySelectorAll('img.lazyload')
             img.forEach((img) => {
+                // 添加页码属性
                 img.setAttribute('data-page', page)
                 this.observer.addObserve(img)
+                if (!(img instanceof HTMLImageElement)) return
+                addDownloadCheckbox(img)
             })
         }
     }
