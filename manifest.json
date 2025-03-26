@@ -15,12 +15,12 @@
     ],
     "web_accessible_resources": [
         {
-            "resources": ["contentStyle.css", "icon-32.png"],
+            "resources": ["contentStyle.css", "icon-128.png"],
             "matches": []
         }
     ],
     "background": {
         "service_worker": "src/background/background.ts"
     },
-    "permissions": ["downloads"]
+    "permissions": ["downloads", "tabs", "activeTab"]
 }

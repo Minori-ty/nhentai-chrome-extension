@@ -23,5 +23,8 @@ export default mergeConfig(
             ...baseBuildOptions,
             outDir,
         },
+        worker: {
+            format: 'es',
+        },
     })
 )

@@ -3,6 +3,7 @@ import { singlePage } from './pages/singlePage'
 import { favcontainerPage } from './pages/favorites'
 import '@/utils/debug'
 import { comicDetailPage } from './pages/comicDetail'
+import { tabChannel } from '@/config'
 /**
  * 将nhentai分成4种类型 1.首页 2.漫画详情页 3.搜索页 4.收藏夹
  * 首页
@@ -42,3 +43,17 @@ if (pathname === '/') {
 } else if (searchPage.some((path) => pathname.includes(path))) {
     homePage()
 }
+
+export let port = chrome.runtime.connect({ name: tabChannel })
+// const document = window.document
+port.onMessage.addListener((data: { taskId: string; progress: number }) => {
+    const progressBar = document.getElementById(`progress-bar_${data.taskId}`)
+    progressBar && (progressBar.style.width = data.progress + '%')
+    const progressText = document.getElementById(`progress-text_${data.taskId}`)
+    progressText && (progressText.textContent = data.progress + '%')
+})
+
+// 页面卸载时断开连接
+window.addEventListener('unload', () => {
+    port.disconnect()
+})

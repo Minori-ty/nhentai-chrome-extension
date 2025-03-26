@@ -1,0 +1,44 @@
+$primary: #409eff;
+$success: #67c23a;
+
+.download-progress {
+    position: absolute;
+    bottom: 0;
+    background-color: #fff;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    height: 30px;
+    padding: 10px;
+
+    --height: 20px;
+
+    /* 进度条容器 */
+    .progress-container {
+        width: 100%;
+        background-color: #e0e0e0;
+        border-radius: var(--height);
+        overflow: hidden;
+        position: relative;
+    }
+
+    /* 进度条 */
+    [id^='progress-bar_'] {
+        width: 0%;
+        height: var(--height);
+        background-color: #3498db;
+        transition: width 0.5s ease; /* 添加过渡效果 */
+    }
+
+    /* 进度文字 */
+    [id^='progress-text_'] {
+        position: absolute;
+        width: 100%;
+        top: 0;
+        left: 0;
+        line-height: var(--height);
+        text-align: center;
+        color: #fff;
+        font-weight: bold;
+    }
+}

@@ -33,8 +33,7 @@ export function createDownloadButton() {
             const id = checkbox.getAttribute('data-id')
             if (!id) return
             const res = await getNHentaiInfo(id)
-            window.console.log(res)
-            download(res)
+            download(res, checkbox)
         })
     })
 }
