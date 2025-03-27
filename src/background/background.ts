@@ -4,6 +4,7 @@ import JSZip from 'jszip'
 import type { ISendMessage } from '@/types'
 import { tabChannel } from '@/config'
 import ProgressObserver from '@/utils/progressObserver'
+import run from '@/utils/run'
 
 let progressPorts: chrome.runtime.Port[] = []
 
@@ -23,26 +24,30 @@ chrome.runtime.onConnect.addListener(function (port) {
         for (let i = 0; i < total; i++) {
             taskList.push(() => retryWrapper(() => createTask({ i, zip, data, progressObserver })))
         }
-        await run(taskList, 6)
+        try {
+            await run(taskList, 6)
 
-        // 生成 base64 格式的 zip 数据
-        const zipBase64 = await zip.generateAsync({ type: 'base64' })
-        // 构造 data URL
-        const dataUrl = `data:application/zip;base64,${zipBase64}`
-        // 使用 chrome.downloads.download 触发下载
-        chrome.downloads.download(
-            {
-                url: dataUrl,
-                filename: `${data.data.title.japanese}.zip`,
-                saveAs: false,
-            },
-            (downloadId) => {
-                progressObserver.postMessage(data.taskId, 100)
-                if (chrome.runtime.lastError) {
-                    console.error(chrome.runtime.lastError)
+            // 生成 base64 格式的 zip 数据
+            const zipBase64 = await zip.generateAsync({ type: 'base64' })
+            // 构造 data URL
+            const dataUrl = `data:application/zip;base64,${zipBase64}`
+            // 使用 chrome.downloads.download 触发下载
+            chrome.downloads.download(
+                {
+                    url: dataUrl,
+                    filename: `${data.data.title.japanese}.zip`,
+                    saveAs: false,
+                },
+                (downloadId) => {
+                    progressObserver.postMessage(data.taskId, 100)
+                    if (chrome.runtime.lastError) {
+                        console.error(chrome.runtime.lastError)
+                    }
                 }
-            }
-        )
+            )
+        } catch {
+            console.log('图片部分下载失败')
+        }
     })
 })
 
@@ -165,57 +170,57 @@ function createTask({
  * @template T - 任务执行结果的类型
  */
 type AsyncTask<T> = () => Promise<T>
-function run<T>(tasks: AsyncTask<T>[], maxConcurrent: number) {
-    return new Promise(async (resolve, reject) => {
-        // 验证最大并发数是否有效
-        if (maxConcurrent < 1) {
-            throw new Error('maxConcurrent must be greater than 0')
-        }
+// function run<T>(tasks: AsyncTask<T>[], maxConcurrent: number) {
+//     return new Promise(async (resolve, reject) => {
+//         // 验证最大并发数是否有效
+//         if (maxConcurrent < 1) {
+//             throw new Error('maxConcurrent must be greater than 0')
+//         }
 
-        /** 追踪当前执行到的任务索引 */
-        let taskIndex = 0
+//         /** 追踪当前执行到的任务索引 */
+//         let taskIndex = 0
 
-        /**
-         * 执行单个任务的函数
-         * @param index - 任务在数组中的索引位置
-         */
-        const runTask = async (index: number): Promise<void> => {
-            /** 当前要执行的任务 */
-            const task = tasks[index]
+//         /**
+//          * 执行单个任务的函数
+//          * @param index - 任务在数组中的索引位置
+//          */
+//         const runTask = async (index: number): Promise<void> => {
+//             /** 当前要执行的任务 */
+//             const task = tasks[index]
 
-            try {
-                /** 任务执行的结果 */
-                const result = await task()
-            } catch (err) {
-                reject(err)
-            }
-        }
+//             try {
+//                 /** 任务执行的结果 */
+//                 task()
+//             } catch (err) {
+//                 reject(err)
+//             }
+//         }
 
-        /**
-         * 执行下一个任务的函数
-         * 通过递归调用实现任务的连续执行
-         */
-        const next = async (): Promise<void> => {
-            // 获取当前任务索引并递增
-            const currentIndex = taskIndex++
-            // 如果所有任务都已开始执行，则返回
-            if (currentIndex >= tasks.length) return
+//         /**
+//          * 执行下一个任务的函数
+//          * 通过递归调用实现任务的连续执行
+//          */
+//         const next = async (): Promise<void> => {
+//             // 获取当前任务索引并递增
+//             const currentIndex = taskIndex++
+//             // 如果所有任务都已开始执行，则返回
+//             if (currentIndex >= tasks.length) return
 
-            // 执行当前任务
-            await runTask(currentIndex)
-            // 递归执行下一个任务
-            return next()
-        }
+//             // 执行当前任务
+//             await runTask(currentIndex)
+//             // 递归执行下一个任务
+//             return next()
+//         }
 
-        /** 初始的并发任务数组 */
-        const initialTasks = Array.from({ length: Math.min(maxConcurrent, tasks.length) }, () => next())
+//         /** 初始的并发任务数组 */
+//         const initialTasks = Array.from({ length: Math.min(maxConcurrent, tasks.length) }, () => next())
 
-        // 等待所有任务完成并返回结果
-        await Promise.all(initialTasks)
+//         // 等待所有任务完成并返回结果
+//         await Promise.all(initialTasks)
 
-        resolve(null)
-    })
-}
+//         resolve(null)
+//     })
+// }
 
 async function retryWrapper<T extends Function>(fn: T) {
     let retries = 0

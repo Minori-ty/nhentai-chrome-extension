@@ -11,6 +11,11 @@
             "matches": ["*://*.nhentai.net/*"],
             "js": ["src/index.ts"],
             "css": ["contentStyle.css"]
+        },
+        {
+            "matches": ["*://*.nhentai.net/*"],
+            "js": ["src/utils/clearConsole.ts"],
+            "run_at": "document_start"
         }
     ],
     "web_accessible_resources": [

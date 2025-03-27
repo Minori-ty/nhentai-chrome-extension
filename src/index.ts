@@ -1,7 +1,6 @@
 import { homePage } from './pages/home'
 import { singlePage } from './pages/singlePage'
 import { favcontainerPage } from './pages/favorites'
-import '@/utils/debug'
 import { comicDetailPage } from './pages/comicDetail'
 import { tabChannel } from '@/config'
 /**
