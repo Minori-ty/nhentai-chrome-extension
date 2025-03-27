@@ -9,7 +9,13 @@ export default class ProgressOberver {
         this.count++
     }
 
-    postMessage(taskId: string, progress: number) {
-        this.port.postMessage({ taskId, progress })
+    postMessage(data: IPostMessageType) {
+        this.port.postMessage(data)
     }
+}
+
+export interface IPostMessageType {
+    type: 'progress' | 'zip' | 'success'
+    taskId: string
+    progress: number
 }

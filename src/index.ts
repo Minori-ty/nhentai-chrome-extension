@@ -3,6 +3,8 @@ import { singlePage } from './pages/singlePage'
 import { favcontainerPage } from './pages/favorites'
 import { comicDetailPage } from './pages/comicDetail'
 import { tabChannel } from '@/config'
+import type { IPostMessageType } from '@/utils/progressObserver'
+
 /**
  * 将nhentai分成4种类型 1.首页 2.漫画详情页 3.搜索页 4.收藏夹
  * 首页
@@ -45,11 +47,29 @@ if (pathname === '/') {
 
 export let port = chrome.runtime.connect({ name: tabChannel })
 // const document = window.document
-port.onMessage.addListener((data: { taskId: string; progress: number }) => {
+port.onMessage.addListener((data: IPostMessageType) => {
     const progressBar = document.getElementById(`progress-bar_${data.taskId}`)
-    progressBar && (progressBar.style.width = data.progress + '%')
     const progressText = document.getElementById(`progress-text_${data.taskId}`)
-    progressText && (progressText.textContent = data.progress + '%')
+    if (!progressBar || !progressText) return
+    switch (data.type) {
+        case 'progress':
+            progressBar.classList.remove('zip')
+            progressBar.classList.remove('success')
+            progressBar.style.width = data.progress + '%'
+            progressText.textContent = data.progress + '%'
+            break
+
+        case 'zip':
+            progressBar.classList.add('zip')
+            progressBar.style.width = data.progress + '%'
+            progressText.textContent = data.progress + '%'
+            break
+
+        case 'success':
+            progressBar.classList.remove('zip')
+            progressBar.classList.add('success')
+            break
+    }
 })
 
 // 页面卸载时断开连接

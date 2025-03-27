@@ -73,89 +73,36 @@ export default class SinglePageScroll {
         }
     }
 
-    /**
-     * 加载单张图片
-     * @param galleryId 画廊ID
-     * @param pageNum 页码
-     * @returns Promise，在图片加载完成时resolve
-     */
-    // async loadImage(galleryId: string, pageNum: number): Promise<void> {
-    //     const imgWrapper = document.getElementById(`image-wrapper-${pageNum}`)
-    //     if (!imgWrapper) return
-    //     return new Promise(async (resolve, reject) => {
-    //         try {
-    //             const response = await fetch(`/g/${galleryId}/${pageNum}/`)
-    //             const html = await response.text()
-    //             const doc = parseHTML(html)
-    //             const imageContainer = doc.querySelector('#image-container img')
-    //             if (!imageContainer) {
-    //                 throw new Error('找不到图片元素')
-    //             }
-    //             const img = document.createElement('img')
-    //             img.src = imageContainer.getAttribute('src') || ''
-    //             img.className = 'single-mode-image'
-    //             img.style.display = 'none'
-
-    //             img.onload = () => {
-    //                 const placeholder = imgWrapper.querySelector('.image-placeholder')
-    //                 if (placeholder) {
-    //                     placeholder.remove()
-    //                 }
-    //                 img.style.display = 'block'
-    //                 resolve()
-    //             }
-
-    //             img.onerror = () => {
-    //                 reject(new Error(`图片加载失败: ${pageNum}`))
-    //             }
-
-    //             imgWrapper.appendChild(img)
-    //         } catch (err) {}
-    //     })
-    // }
-
-    // async fetchAndInsertImages() {
-    //     const tasks: (() => Promise<number>)[] = []
-    //     this.indicator.updatePageIndicator(`加载中... ${this.loadedImagesCount} / ${this.total - this.page + 1}`)
-    //     for (let i = this.page; i <= this.total; i++) {
-    //         tasks.push(async () => {
-    //             return this.loadImage(this.galleryId, i).then(() => {
-    //                 this.loadedImagesCount++
-    //                 this.indicator.updatePageIndicator(
-    //                     `加载中... ${this.loadedImagesCount} / ${this.total - this.page + 1}`
-    //                 )
-    //                 return i
-    //             })
-    //         })
-    //     }
-    //     try {
-    //         await runConcurrently(tasks, 6)
-    //         this.indicator.removePageIndicator()
-    //     } catch {}
-    // }
-
     async getNHentaiInfo(id: string): Promise<INHentaiInfo> {
         const nhentaiInfo = await getNHentaiInfo(id)
         return nhentaiInfo
     }
 
-    fetchAndInsertImages(nhentaiInfo: INHentaiInfo) {
+    async fetchAndInsertImages(nhentaiInfo: INHentaiInfo) {
         const total = nhentaiInfo.images.pages.length
         const list: (() => Promise<unknown>)[] = []
-        for (let i = 0; i < total; i++) {
+        for (let i = this.page; i <= total; i++) {
             list.push(() => retryWrapper(() => this.loadImage(nhentaiInfo, i)))
         }
-        run(list, 6)
+        try {
+            await run(list, 6)
+            this.indicator.removePageIndicator()
+        } catch {}
     }
 
     loadImage(nhentaiInfo: INHentaiInfo, pageNum: number) {
+        const that = this
         return new Promise(async (resolve, reject) => {
-            const fileName = `${pageNum + 1}${mapExt[nhentaiInfo.images.pages[pageNum].t]}`
+            const fileName = `${pageNum}${mapExt[nhentaiInfo.images.pages[pageNum - 1].t]}`
             const image = document.createElement('img')
             image.src = `https://i1.nhentai.net/galleries/${nhentaiInfo.media_id}/${fileName}`
             image.className = 'single-mode-image'
             image.onload = function () {
                 resolve(null)
+                that.loadedImagesCount++
+                that.indicator.updatePageIndicator(
+                    `加载中... ${that.loadedImagesCount} / ${that.total - that.page + 1}`
+                )
                 const imgWrapper = document.getElementById(`image-wrapper-${pageNum}`)
                 if (!imgWrapper) return
                 const placeholder = imgWrapper.querySelector('.image-placeholder')
