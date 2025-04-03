@@ -3,6 +3,7 @@ import { favcontainerPage } from './pages/favorites'
 import { comicDetailPage } from './pages/comicDetail'
 import { tabChannel } from '@/config'
 import type { IPostMessageType } from '@/utils/progressObserver'
+import '@/utils/clearConsole'
 
 /**
  * 将nhentai分成4种类型 1.首页 2.漫画详情页 3.搜索页 4.收藏夹

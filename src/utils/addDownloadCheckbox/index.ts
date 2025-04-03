@@ -6,6 +6,9 @@ export function addDownloadCheckbox(img: HTMLImageElement) {
     const checkbox = document.createElement('input')
     checkbox.type = 'checkbox'
     checkbox.className = 'download-checkbox'
+    checkbox.addEventListener('click', (event) => {
+        event.stopPropagation()
+    })
     const cover = img.parentElement
     if (!cover) return
     cover.appendChild(checkbox)
