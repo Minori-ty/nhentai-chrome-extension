@@ -23,7 +23,7 @@ export default class Observer {
                     map.set(target.getAttribute('data-page'), 1)
                 }
                 const maxCount = Math.max(...map.values())
-                const maxPage = [...map.entries()].find(([key, value]) => value === maxCount)![0]
+                const maxPage = [...map.entries()].find(([_, value]) => value === maxCount)![0]
                 this.indicator.updatePageIndicator(`${maxPage} / ${this.total}`)
             }
         })

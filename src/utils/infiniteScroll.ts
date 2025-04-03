@@ -126,7 +126,7 @@ export default class InfiniteScroll {
             // 处理懒加载图片，传入页码
             this.handleLazyImages(fragment, nextPage)
             currentContainer.appendChild(fragment)
-        } catch (err) {
+        } catch {
             if (retryCount < this.MAX_RETRIES) {
                 await new Promise((resolve) => setTimeout(resolve, this.RETRY_DELAY))
                 return this.loadNextPage(retryCount + 1)

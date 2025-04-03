@@ -1,5 +1,3 @@
-import parseHTML from './parseHTML'
-import { runConcurrently } from './runConcurrently'
 import PageIndicator from './indicator'
 import { getNHentaiInfo, mapExt } from '@/api'
 import type { INHentaiInfo } from '@/api/index.d'
@@ -87,12 +85,14 @@ export default class SinglePageScroll {
         try {
             await run(list, 6)
             this.indicator.removePageIndicator()
-        } catch {}
+        } catch (e) {
+            window.log(e)
+        }
     }
 
     loadImage(nhentaiInfo: INHentaiInfo, pageNum: number) {
         const that = this
-        return new Promise(async (resolve, reject) => {
+        return new Promise((resolve, reject) => {
             const fileName = `${pageNum}${mapExt[nhentaiInfo.images.pages[pageNum - 1].t]}`
             const image = document.createElement('img')
             image.src = `https://i1.nhentai.net/galleries/${nhentaiInfo.media_id}/${fileName}`

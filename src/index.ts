@@ -1,5 +1,4 @@
 import { homePage } from './pages/home'
-import { singlePage } from './pages/singlePage'
 import { favcontainerPage } from './pages/favorites'
 import { comicDetailPage } from './pages/comicDetail'
 import { tabChannel } from '@/config'
@@ -45,7 +44,7 @@ if (pathname === '/') {
     homePage()
 }
 
-export let port = chrome.runtime.connect({ name: tabChannel })
+export const port = chrome.runtime.connect({ name: tabChannel })
 // const document = window.document
 port.onMessage.addListener((data: IPostMessageType) => {
     const progressBar = document.getElementById(`progress-bar_${data.taskId}`)
