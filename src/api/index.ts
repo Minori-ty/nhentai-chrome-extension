@@ -17,9 +17,12 @@ export const enum Ext {
     w = 'w',
     /** jpg */
     j = 'j',
+    /** png */
+    p = 'p',
 }
 
 export const mapExt = {
     [Ext.w]: '.webp',
     [Ext.j]: '.jpg',
+    [Ext.p]: '.png',
 } as const
