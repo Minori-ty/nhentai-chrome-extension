@@ -2,7 +2,7 @@ import { homePage } from './pages/home'
 import { favcontainerPage } from './pages/favorites'
 import { comicDetailPage } from './pages/comicDetail'
 import { tabChannel } from '@/config'
-import type { IPostMessageType } from '@/utils/progressObserver'
+import { EPostType, type IPostMessageType } from '@/utils/progressObserver'
 import '@/utils/clearConsole'
 
 /**
@@ -52,22 +52,22 @@ port.onMessage.addListener((data: IPostMessageType) => {
     const progressText = document.getElementById(`progress-text_${data.taskId}`)
     if (!progressBar || !progressText) return
     switch (data.type) {
-        case 'progress':
-            progressBar.classList.remove('zip')
-            progressBar.classList.remove('success')
+        case EPostType.downloadProgress:
+            setClass(progressBar, 'progress')
             progressBar.style.width = data.progress + '%'
-            progressText.textContent = data.progress + '%'
+            progressText.textContent = `下载中 ${data.progress}%`
             break
 
-        case 'zip':
-            progressBar.classList.add('zip')
+        case EPostType.zipProgress:
+            setClass(progressBar, 'zip')
             progressBar.style.width = data.progress + '%'
-            progressText.textContent = data.progress + '%'
+            progressText.textContent = `编码中 ${data.progress}%`
             break
 
-        case 'success':
-            progressBar.classList.remove('zip')
-            progressBar.classList.add('success')
+        case EPostType.base64Progress:
+            setClass(progressBar, 'success')
+            progressBar.style.width = data.progress + '%'
+            progressText.textContent = `压缩中 ${data.progress}%`
             break
     }
 })
@@ -76,3 +76,9 @@ port.onMessage.addListener((data: IPostMessageType) => {
 window.addEventListener('unload', () => {
     port.disconnect()
 })
+
+function setClass(progressBar: HTMLElement, className: string) {
+    progressBar.className = ''
+    progressBar.classList.add('progress-bar')
+    progressBar.classList.add(className)
+}

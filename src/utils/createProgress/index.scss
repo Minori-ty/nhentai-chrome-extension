@@ -1,6 +1,7 @@
 $primary: #409eff;
 $success: #67c23a;
 $zip: #ffb63e;
+$base64: #484540;
 
 .download-progress {
     position: absolute;
@@ -28,7 +29,7 @@ $zip: #ffb63e;
         width: 0%;
         height: var(--height);
         background-color: #3498db;
-        transition: width 0.5s ease; /* 添加过渡效果 */
+        // transition: width 0.5s ease; /* 添加过渡效果 */
     }
 
     [id^='progress-bar_'].success {
@@ -37,6 +38,10 @@ $zip: #ffb63e;
 
     [id^='progress-bar_'].zip {
         background-color: $zip;
+    }
+
+    [id^='progress-bar_'].base64 {
+        background-color: $base64;
     }
 
     /* 进度文字 */

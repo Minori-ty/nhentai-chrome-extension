@@ -13,9 +13,30 @@ export default class ProgressOberver {
         this.port.postMessage(data)
     }
 }
+export const enum EPostType {
+    /** 下载进度 */
+    downloadProgress = 'downloadProgress',
+    /** 压缩进度 */
+    zipProgress = 'zipProgress',
+    /** base64编码进度 */
+    base64Progress = 'Progress',
+    /** 成功标志 */
+    successFlag = 'successFlag',
+    /** 下载地址 */
+    blob = 'blob',
+}
 
-export interface IPostMessageType {
-    type: 'progress' | 'zip' | 'success'
+type EPostTypeValues = `${EPostType}`
+type WithoutBlobUrl = Exclude<EPostTypeValues, 'blob'>
+export type IPostMessageType = IPostMessageProgress | IPostMessageDownload
+
+interface IPostMessageProgress {
+    type: WithoutBlobUrl
     taskId: string
     progress: number
+}
+interface IPostMessageDownload {
+    type: 'blob'
+    taskId: string
+    blob: Blob
 }

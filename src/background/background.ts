@@ -1,8 +1,9 @@
+/* eslint-disable nhentai/forbidan-console */
 import { mapExt } from '@/api'
 import JSZip from 'jszip'
 import type { ISendMessage } from '@/types'
 import { tabChannel } from '@/config'
-import ProgressObserver from '@/utils/progressObserver'
+import ProgressObserver, { EPostType } from '@/utils/progressObserver'
 import run from '@/utils/run'
 
 // 监听连接
@@ -21,15 +22,19 @@ chrome.runtime.onConnect.addListener(function (port) {
             await run(taskList, 6)
 
             // 生成 base64 格式的 zip 数据
-            const zipBase64 = await zip.generateAsync({ type: 'base64' }, function (metadata) {
+            const zipBlob = await zip.generateAsync({ type: 'blob' }, function (metadata) {
+                // console.log('压缩进度', metadata.percent.toFixed(2))
                 progressObserver.postMessage({
-                    type: 'zip',
+                    type: EPostType.zipProgress,
                     taskId: data.taskId,
                     progress: Number(metadata.percent.toFixed(2)),
                 })
             })
             // 构造 data URL
-            const dataUrl = `data:application/zip;base64,${zipBase64}`
+            const dataUrl = await blobToBase64WithProgress(zipBlob, (precent) => {
+                progressObserver.postMessage({ type: EPostType.base64Progress, taskId: data.taskId, progress: precent })
+            })
+
             // 使用 chrome.downloads.download 触发下载
             chrome.downloads.download(
                 {
@@ -37,15 +42,17 @@ chrome.runtime.onConnect.addListener(function (port) {
                     filename: `${data.data.title.japanese}.zip`,
                     saveAs: false,
                 },
-                () => {
-                    progressObserver.postMessage({ type: 'success', taskId: data.taskId, progress: 100 })
-                    if (chrome.runtime.lastError) {
+                (downloadId) => {
+                    if (!downloadId) {
                         console.error(chrome.runtime.lastError)
+                        return
                     }
+
+                    progressObserver.postMessage({ type: EPostType.successFlag, taskId: data.taskId, progress: 100 })
                 }
             )
-        } catch {
-            window.log('图片部分下载失败')
+        } catch (e) {
+            console.log('图片下载失败', e)
         }
     })
 })
@@ -61,23 +68,30 @@ function createTask({
     data: ISendMessage
     progressObserver: ProgressObserver
 }) {
-    return new Promise(async (resolve, reject) => {
-        try {
-            const fileName = `${i + 1}${mapExt[data.data.images.pages[i].t]}`
-            const response = await fetch(`https://i1.nhentai.net/galleries/${data.data.media_id}/${fileName}`)
-            const arrayBuffer = await response.arrayBuffer()
-            const imageData = new Uint8Array(arrayBuffer)
-            zip.file(fileName, imageData)
-            resolve(null)
-            progressObserver.updateCount()
-            progressObserver.postMessage({
-                type: 'progress',
-                taskId: data.taskId,
-                progress: Math.floor((progressObserver.count / data.data.images.pages.length) * 100),
+    return new Promise((resolve, reject) => {
+        const fileName = `${i + 1}${mapExt[data.data.images.pages[i].t]}`
+        fetch(`https://i${Math.floor(Math.random() * 4) + 1}.nhentai.net/galleries/${data.data.media_id}/${fileName}`)
+            .then((response) => {
+                response
+                    .arrayBuffer()
+                    .then((arrayBuffer) => {
+                        const imageData = new Uint8Array(arrayBuffer)
+                        zip.file(fileName, imageData)
+                        resolve(null)
+                        progressObserver.updateCount()
+                        progressObserver.postMessage({
+                            type: EPostType.downloadProgress,
+                            taskId: data.taskId,
+                            progress: Math.floor((progressObserver.count / data.data.images.pages.length) * 100),
+                        })
+                    })
+                    .catch((e) => {
+                        reject(e)
+                    })
             })
-        } catch (e) {
-            reject(e)
-        }
+            .catch((e) => {
+                reject(e)
+            })
     })
 }
 
@@ -92,10 +106,31 @@ async function retryWrapper<T extends () => Promise<unknown>>(fn: T) {
             retries++
             if (retries < maxRetries) {
                 await new Promise((resolve) => setTimeout(resolve, delay))
-                window.log('下载失败，重试中', retries)
+                console.log('下载失败，重试中', retries)
             } else {
                 throw error
             }
         }
     }
+}
+
+async function blobToBase64WithProgress(blob: Blob, onProgress: (precent: number) => void) {
+    const buffer = await blob.arrayBuffer()
+    const bytes = new Uint8Array(buffer)
+    const chunkSize = 64 * 1024 // 每次处理64KB
+    let binary = ''
+
+    for (let i = 0; i < bytes.length; i += chunkSize) {
+        const chunk = bytes.subarray(i, i + chunkSize)
+        for (let j = 0; j < chunk.length; j++) {
+            binary += String.fromCharCode(chunk[j])
+        }
+        if (onProgress) {
+            onProgress(Number(Math.min(((i + chunkSize) / bytes.length) * 100, 100).toFixed(2)))
+        }
+        // 让出线程，防止阻塞
+        await new Promise((resolve) => setTimeout(resolve, 0))
+    }
+
+    return `data:application/zip;base64,${btoa(binary)}`
 }
