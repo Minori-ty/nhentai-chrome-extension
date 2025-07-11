@@ -46,10 +46,10 @@ if (pathname === '/') {
 }
 
 export const port = chrome.runtime.connect({ name: tabChannel })
-// const document = window.document
 port.onMessage.addListener((data: IPostMessageType) => {
-    const progressBar = document.getElementById(`progress-bar_${data.taskId}`)
-    const progressText = document.getElementById(`progress-text_${data.taskId}`)
+    const progressBar = document.getElementById(`progress-bar_${data.id}`)
+    const progressText = document.getElementById(`progress-text_${data.id}`)
+    const checkbox = document.querySelector<HTMLInputElement>(`input[data-id="${data.id}"]`)
     if (!progressBar || !progressText) return
     switch (data.type) {
         case EPostType.downloadProgress:
@@ -65,11 +65,26 @@ port.onMessage.addListener((data: IPostMessageType) => {
             break
 
         case EPostType.base64Progress:
-            setClass(progressBar, 'success')
+            setClass(progressBar, 'base64')
             progressBar.style.width = data.progress + '%'
             progressText.textContent = `压缩中 ${data.progress}%`
             break
+
+        case EPostType.successFlag:
+            setClass(progressBar, 'success')
+            progressBar.style.width = data.progress + '%'
+            progressText.textContent = `下载成功`
+
+            if (checkbox) {
+                checkbox.checked = false
+            }
+            break
     }
+})
+
+// 监听端口断开事件
+port.onDisconnect.addListener(() => {
+    window.log('与背景脚本的连接已断开')
 })
 
 // 页面卸载时断开连接

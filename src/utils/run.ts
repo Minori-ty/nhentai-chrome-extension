@@ -5,7 +5,7 @@
 type AsyncTask<T> = () => Promise<T>
 
 export default async function run<T>(tasks: AsyncTask<T>[], maxConcurrent: number) {
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
         // 验证最大并发数是否有效
         if (maxConcurrent < 1) {
             throw new Error('maxConcurrent must be greater than 0')
@@ -31,7 +31,8 @@ export default async function run<T>(tasks: AsyncTask<T>[], maxConcurrent: numbe
             return next()
         }
         const initialTasks = Array.from({ length: Math.min(maxConcurrent, tasks.length) }, () => next())
-        await Promise.all(initialTasks)
-        resolve('任务全部成功')
+        Promise.all(initialTasks).then(() => {
+            resolve('任务全部成功')
+        })
     })
 }

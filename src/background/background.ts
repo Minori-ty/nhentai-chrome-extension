@@ -26,13 +26,13 @@ chrome.runtime.onConnect.addListener(function (port) {
                 // console.log('压缩进度', metadata.percent.toFixed(2))
                 progressObserver.postMessage({
                     type: EPostType.zipProgress,
-                    taskId: data.taskId,
+                    id: data.id,
                     progress: Number(metadata.percent.toFixed(2)),
                 })
             })
             // 构造 data URL
             const dataUrl = await blobToBase64WithProgress(zipBlob, (precent) => {
-                progressObserver.postMessage({ type: EPostType.base64Progress, taskId: data.taskId, progress: precent })
+                progressObserver.postMessage({ type: EPostType.base64Progress, id: data.id, progress: precent })
             })
 
             // 使用 chrome.downloads.download 触发下载
@@ -48,12 +48,17 @@ chrome.runtime.onConnect.addListener(function (port) {
                         return
                     }
 
-                    progressObserver.postMessage({ type: EPostType.successFlag, taskId: data.taskId, progress: 100 })
+                    progressObserver.postMessage({ type: EPostType.successFlag, id: data.id, progress: 100 })
                 }
             )
         } catch (e) {
             console.log('图片下载失败', e)
         }
+    })
+
+    // 监听端口断开事件
+    port.onDisconnect.addListener(() => {
+        console.log('端口已断开:', port.name)
     })
 })
 
@@ -81,7 +86,7 @@ function createTask({
                         progressObserver.updateCount()
                         progressObserver.postMessage({
                             type: EPostType.downloadProgress,
-                            taskId: data.taskId,
+                            id: data.id,
                             progress: Math.floor((progressObserver.count / data.data.images.pages.length) * 100),
                         })
                     })

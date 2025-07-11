@@ -14,9 +14,6 @@ importers:
       jszip:
         specifier: ^3.10.1
         version: 3.10.1
-      uuid:
-        specifier: ^11.1.0
-        version: 11.1.0
       webextension-polyfill:
         specifier: ^0.12.0
         version: 0.12.0
@@ -39,9 +36,6 @@ importers:
       '@types/streamsaver':
         specifier: ^2.0.5
         version: 2.0.5
-      '@types/uuid':
-        specifier: ^10.0.0
-        version: 10.0.0
       '@types/webextension-polyfill':
         specifier: ^0.12.2
         version: 0.12.2
@@ -680,9 +674,6 @@ packages:
 
   '@types/streamsaver@2.0.5':
     resolution: {integrity: sha512-93o0zjV8swEhR2YI57h/2ytbJF8bJh7sI9GNB02TLJHdM4fWDxZuChwfWhyD8vt2ub4kw4rsfZ0C0yAUX+3gcg==}
-
-  '@types/uuid@10.0.0':
-    resolution: {integrity: sha512-7gqG38EyHgyP1S+7+xomFtL+ZNHcKv6DwNaCZmJmo1vgMugyF3TCnXVg4t1uk89mLNwnLtnY3TpOpCOyp1/xHQ==}
 
   '@types/webextension-polyfill@0.12.2':
     resolution: {integrity: sha512-rUIyZfbj1TcxlV0IWyy7MUHnW24nqUfQR0F+vPru/3t4noA9Pd4sdG4sljQgQHLd1vYgmkFLSvEc/furzQPbUw==}
@@ -2071,10 +2062,6 @@ packages:
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
 
-  uuid@11.1.0:
-    resolution: {integrity: sha512-0/A9rDy9P7cJ+8w1c9WD9V//9Wj15Ce2MPz8Ri6032usz+NfePxx5AcN3bN+r6ZL6jEo066/yNYB3tn4pQEx+A==}
-    hasBin: true
-
   v8-compile-cache-lib@3.0.1:
     resolution: {integrity: sha512-wa7YjyUGfNZngI/vtK0UHAN+lgDCxBPCylVXGp0zu59Fz5aiGtNXaq3DhIov063MorB+VfufLh3JlF2KdTK3xg==}
 
@@ -2573,8 +2560,6 @@ snapshots:
       undici-types: 7.8.0
 
   '@types/streamsaver@2.0.5': {}
-
-  '@types/uuid@10.0.0': {}
 
   '@types/webextension-polyfill@0.12.2': {}
 
@@ -4273,8 +4258,6 @@ snapshots:
       punycode: 2.3.1
 
   util-deprecate@1.0.2: {}
-
-  uuid@11.1.0: {}
 
   v8-compile-cache-lib@3.0.1: {}
 

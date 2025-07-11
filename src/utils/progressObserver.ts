@@ -32,11 +32,11 @@ export type IPostMessageType = IPostMessageProgress | IPostMessageDownload
 
 interface IPostMessageProgress {
     type: WithoutBlobUrl
-    taskId: string
+    id: number
     progress: number
 }
 interface IPostMessageDownload {
     type: 'blob'
-    taskId: string
+    id: number
     blob: Blob
 }
