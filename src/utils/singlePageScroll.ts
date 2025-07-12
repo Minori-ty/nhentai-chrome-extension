@@ -18,6 +18,7 @@ export default class SinglePageScroll {
     constructor() {
         const url = new URL(window.location.href)
         const pathname = url.pathname
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const [space1, prefix, galleryId, page, space2] = pathname.split('/')
         this.getNHentaiInfo(galleryId).then((res) => {
             this.fetchAndInsertImages(res)
@@ -80,7 +81,7 @@ export default class SinglePageScroll {
         const total = nhentaiInfo.images.pages.length
         const list: (() => Promise<unknown>)[] = []
         for (let i = this.page; i <= total; i++) {
-            list.push(() => retryWrapper(() => this.loadImage(nhentaiInfo, i)))
+            list.push(() => retryWrapper(() => this.loadImage(nhentaiInfo, i), i))
         }
         try {
             await run(list, 6)
@@ -91,17 +92,19 @@ export default class SinglePageScroll {
     }
 
     loadImage(nhentaiInfo: INHentaiInfo, pageNum: number) {
-        const that = this
+        // const that = this
         return new Promise((resolve, reject) => {
             const fileName = `${pageNum}${mapExt[nhentaiInfo.images.pages[pageNum - 1].t]}`
             const image = document.createElement('img')
-            image.src = `https://i1.nhentai.net/galleries/${nhentaiInfo.media_id}/${fileName}`
+            image.src = `https://i${Math.floor(Math.random() * 4) + 1}.nhentai.net/galleries/${
+                nhentaiInfo.media_id
+            }/${fileName}`
             image.className = 'single-mode-image'
-            image.onload = function () {
+            image.onload = () => {
                 resolve(null)
-                that.loadedImagesCount++
-                that.indicator.updatePageIndicator(
-                    `加载中... ${that.loadedImagesCount} / ${that.total - that.page + 1}`
+                this.loadedImagesCount++
+                this.indicator.updatePageIndicator(
+                    `加载中... ${this.loadedImagesCount} / ${this.total - this.page + 1}`
                 )
                 const imgWrapper = document.getElementById(`image-wrapper-${pageNum}`)
                 if (!imgWrapper) return
@@ -112,7 +115,7 @@ export default class SinglePageScroll {
                 imgWrapper.appendChild(image)
             }
             image.onerror = () => {
-                reject(new Error(`图片加载失败: ${pageNum}`))
+                reject(new Error(`[${pageNum}] ❌图片加载失败`))
             }
         })
     }

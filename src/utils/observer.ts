@@ -13,14 +13,23 @@ export default class Observer {
     handleIntersect(entries: IntersectionObserverEntry[]) {
         entries.forEach((entry) => {
             if (entry.isIntersecting) {
-                const map = new Map()
+                const map = new Map<string, number>()
                 const target = entry.target as HTMLElement
+                const dataPage = target.getAttribute('data-page')
+                if (!dataPage) {
+                    window.log('未找到')
+                    return
+                }
 
-                if (map.has(target.getAttribute('data-page'))) {
-                    const count = map.get(target.getAttribute('data-page'))
-                    map.set(target.getAttribute('data-page'), count + 1)
+                if (map.has(dataPage)) {
+                    const count = map.get(dataPage)
+                    if (count === undefined) {
+                        window.log('未找到该值')
+                        return
+                    }
+                    map.set(dataPage, count + 1)
                 } else {
-                    map.set(target.getAttribute('data-page'), 1)
+                    map.set(dataPage, 1)
                 }
                 const maxCount = Math.max(...map.values())
                 const maxPage = [...map.entries()].find(([_, value]) => value === maxCount)![0]

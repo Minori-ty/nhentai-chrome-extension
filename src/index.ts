@@ -4,6 +4,7 @@ import { comicDetailPage } from './pages/comicDetail'
 import { tabChannel } from '@/config'
 import { EPostType, type IPostMessageType } from '@/utils/progressObserver'
 import '@/utils/clearConsole'
+import type { ISendMessage } from './types'
 
 /**
  * 将nhentai分成4种类型 1.首页 2.漫画详情页 3.搜索页 4.收藏夹
@@ -35,22 +36,53 @@ import '@/utils/clearConsole'
 const pathname = window.location.pathname
 const searchPage = ['/search/', '/parody/', '/tag/', '/artist/', '/group/', '/language/', '/category/', '/character/']
 
+let isConnected = false
+let port: chrome.runtime.Port | null
+// export const port = chrome.runtime.connect({ name: tabChannel })
+// port.onMessage.addListener(onMessage)
+
+// 监听端口断开事件
+// port.onDisconnect.addListener(() => {
+//     window.log('与背景脚本的连接已断开')
+// })
+
 if (pathname === '/') {
+    startConnect()
     homePage()
 } else if (pathname.includes('/g/')) {
     comicDetailPage()
 } else if (pathname.includes('/favorites/')) {
     favcontainerPage()
 } else if (searchPage.some((path) => pathname.includes(path))) {
+    startConnect()
     homePage()
 }
 
-export const port = chrome.runtime.connect({ name: tabChannel })
-port.onMessage.addListener((data: IPostMessageType) => {
+function startConnect() {
+    connect()
+
+    // 页面卸载时断开连接
+    window.addEventListener('beforeunload', disConnect)
+    // 监听标签页切换导致的页面激活
+    let lastVisibilityState = document.visibilityState
+    document.addEventListener('visibilitychange', () => {
+        const currentState = document.visibilityState
+        if (lastVisibilityState === 'hidden' && currentState === 'visible') {
+            // 只检查isConnected即可，因为port与isConnected是同步的
+            if (!isConnected) {
+                window.log('页面从其他标签页切换回来，重新连接')
+                safeConnect()
+            }
+        }
+        lastVisibilityState = currentState
+    })
+}
+
+function onMessage(data: IPostMessageType) {
     const progressBar = document.getElementById(`progress-bar_${data.id}`)
     const progressText = document.getElementById(`progress-text_${data.id}`)
     const checkbox = document.querySelector<HTMLInputElement>(`input[data-id="${data.id}"]`)
-    if (!progressBar || !progressText) return
+    if (!progressBar || !progressText) return false
     switch (data.type) {
         case EPostType.downloadProgress:
             setClass(progressBar, 'progress')
@@ -80,17 +112,68 @@ port.onMessage.addListener((data: IPostMessageType) => {
             }
             break
     }
-})
+}
 
-// 监听端口断开事件
-port.onDisconnect.addListener(() => {
-    window.log('与背景脚本的连接已断开')
-})
+function connect() {
+    if (isConnected) return
+    port = chrome.runtime.connect({ name: tabChannel })
+    isConnected = true
+    port.onMessage.addListener((data) => {
+        onMessage(data)
+        return true
+    })
 
-// 页面卸载时断开连接
-window.addEventListener('unload', () => {
-    port.disconnect()
-})
+    // 监听端口断开事件
+    port.onDisconnect.addListener(() => {
+        window.log('与背景脚本的连接已断开')
+        isConnected = false
+        port = null
+    })
+}
+
+export async function sendMessage(data: ISendMessage) {
+    if (!isConnected || !port) {
+        window.log('端口未连接，尝试重连...')
+        await safeConnect()
+        sendMessage(data)
+        return false
+    }
+    try {
+        port.postMessage(data)
+        return true
+    } catch (error) {
+        window.log('消息发送失败:', error)
+        isConnected = false
+        port = null
+        safeConnect() // 触发重连
+        return false
+    }
+}
+
+function disConnect() {
+    if (isConnected && port) {
+        port.disconnect()
+        port = null
+        isConnected = false
+    }
+}
+
+let reconnectTimer: NodeJS.Timeout | null = null
+
+function safeConnect() {
+    return new Promise((resolve) => {
+        if (reconnectTimer) clearTimeout(reconnectTimer)
+
+        reconnectTimer = setTimeout(() => {
+            if (!isConnected) {
+                window.log('🚀 执行安全重连...')
+                connect()
+                resolve(true)
+            }
+            reconnectTimer = null
+        }, 500) // 防抖延迟
+    })
+}
 
 function setClass(progressBar: HTMLElement, className: string) {
     progressBar.className = ''
